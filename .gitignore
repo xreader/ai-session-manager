@@ -1,0 +1,14 @@
+# Dependencies (none today, but just in case)
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# Never commit local runtime/user data (it lives in ~/.claude, but be safe)
+session-manager-config.json
+session-manager-state.json
+*.local.json
