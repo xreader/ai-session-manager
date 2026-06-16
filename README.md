@@ -18,11 +18,17 @@ This tool reads that data (read‑only) and gives you one clean overview — as 
 
 ## Screenshots
 
-> Add your own screenshots to `docs/` and they'll show up here.
+**List + detail** — all sessions grouped by project, with a rich detail panel:
 
-| List + detail | Timeline | Board |
-|---|---|---|
-| ![List](docs/list.png) | ![Timeline](docs/timeline.png) | ![Board](docs/board.png) |
+![List view](docs/list.svg)
+
+**Timeline** — an absolute time axis showing when each session ran, with activity markers:
+
+![Timeline view](docs/timeline.svg)
+
+**Board** — drag sessions across your own kanban columns:
+
+![Board view](docs/board.svg)
 
 ---
 

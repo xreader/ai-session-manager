@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="1280" height="800" fill="#eef1f5"/>
+
+  <!-- header -->
+  <rect width="1280" height="52" fill="#ffffff"/>
+  <rect y="51" width="1280" height="1" fill="#dce0e6"/>
+  <rect x="18" y="14" width="24" height="24" rx="6" fill="#2563eb"/>
+  <text x="30" y="31" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">C</text>
+  <text x="52" y="33" fill="#1b2330" font-size="16" font-weight="700">Claude Sessions</text>
+  <circle cx="232" cy="27" r="5" fill="#16a34a"/><text x="242" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">2</tspan> active</text>
+  <circle cx="326" cy="27" r="5" fill="#d97706"/><text x="336" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">3</tspan> idle</text>
+  <text x="406" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">30</tspan> total</text>
+  <rect x="690" y="13" width="270" height="28" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <rect x="784" y="13" width="92" height="28" rx="8" fill="#2563eb"/>
+  <text x="736" y="31" fill="#6b7480" font-size="13" text-anchor="middle">List</text>
+  <text x="830" y="31" fill="#ffffff" font-size="13" font-weight="600" text-anchor="middle">Timeline</text>
+  <text x="930" y="31" fill="#6b7480" font-size="13" text-anchor="middle">Board</text>
+  <rect x="1000" y="12" width="210" height="30" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <text x="1014" y="31" fill="#9aa3af" font-size="13">Search…</text>
+  <rect x="1222" y="12" width="36" height="30" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <circle cx="1240" cy="27" r="6" fill="none" stroke="#6b7480" stroke-width="1.5"/><circle cx="1240" cy="27" r="2" fill="#6b7480"/>
+
+  <!-- project tiles -->
+  <rect x="24" y="62" width="150" height="80" rx="10" fill="#f4f6f9" stroke="#2563eb" stroke-width="2"/>
+  <text x="38" y="132" fill="#1b2330" font-size="13" font-weight="700">All projects</text>
+  <text x="158" y="84" fill="#1b2330" font-size="13" font-weight="700" text-anchor="end">30</text>
+  <rect x="184" y="62" width="150" height="80" rx="10" fill="#3f7cc0"/><text x="198" y="132" fill="#fff" font-size="13" font-weight="700">web-shop</text>
+  <rect x="344" y="62" width="150" height="80" rx="10" fill="#9c4f93"/><text x="358" y="132" fill="#fff" font-size="13" font-weight="700">api-server</text>
+  <rect x="504" y="62" width="150" height="80" rx="10" fill="#5a9e6f"/><text x="518" y="132" fill="#fff" font-size="13" font-weight="700">marketing-site</text>
+  <rect x="664" y="62" width="150" height="80" rx="10" fill="#c08a3f"/><text x="678" y="132" fill="#fff" font-size="13" font-weight="700">mobile-app</text>
+  <rect x="824" y="62" width="150" height="80" rx="10" fill="#4f9c9c"/><text x="838" y="132" fill="#fff" font-size="13" font-weight="700">infra-scripts</text>
+
+  <!-- axis -->
+  <g fill="#6b7480" font-size="11" font-weight="700">
+    <text x="330" y="200">May 18</text>
+    <text x="561" y="200">May 25</text>
+    <text x="792" y="200">Jun 01</text>
+    <text x="1023" y="200">Jun 08</text>
+    <text x="1254" y="200" text-anchor="end">Jun 15</text>
+  </g>
+  <!-- gridlines -->
+  <g stroke="#e7eaef">
+    <line x1="330" y1="210" x2="330" y2="788"/>
+    <line x1="561" y1="210" x2="561" y2="788"/>
+    <line x1="792" y1="210" x2="792" y2="788" stroke="#dce0e6"/>
+    <line x1="1023" y1="210" x2="1023" y2="788"/>
+    <line x1="1254" y1="210" x2="1254" y2="788"/>
+  </g>
+
+  <!-- rows: label gutter + bar + dots -->
+  <!-- helper colors: web-shop blue, api purple, marketing green, mobile amber, infra teal -->
+  <g font-size="14">
+    <!-- 1 -->
+    <g transform="translate(0,224)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#16a34a"/><text x="34" y="25" fill="#1b2330" font-weight="600">Fix checkout total rounding</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">web-shop</text>
+      <rect x="1188" y="12" width="40" height="16" rx="3" fill="#dbe7fb" stroke="#7ea8e0"/>
+      <circle cx="1192" cy="20" r="4" fill="#21487f"/><circle cx="1206" cy="20" r="4" fill="#21487f"/><circle cx="1222" cy="20" r="4" fill="#21487f"/>
+    </g>
+    <!-- 2 -->
+    <g transform="translate(0,268)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Add product search filters</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">web-shop</text>
+      <rect x="1089" y="12" width="66" height="16" rx="3" fill="#dbe7fb" stroke="#7ea8e0"/>
+      <circle cx="1095" cy="20" r="4" fill="#21487f"/><circle cx="1115" cy="20" r="4" fill="#21487f"/><circle cx="1135" cy="20" r="4" fill="#21487f"/><circle cx="1150" cy="20" r="4" fill="#21487f"/>
+    </g>
+    <!-- 3 -->
+    <g transform="translate(0,312)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#d97706"/><text x="34" y="25" fill="#1b2330" font-weight="600">Refactor auth middleware</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">api-server</text>
+      <rect x="924" y="12" width="99" height="16" rx="3" fill="#f0dcee" stroke="#c98fc2"/>
+      <circle cx="930" cy="20" r="4" fill="#6e2f68"/><circle cx="960" cy="20" r="4" fill="#6e2f68"/><circle cx="990" cy="20" r="4" fill="#6e2f68"/><circle cx="1016" cy="20" r="4" fill="#6e2f68"/>
+    </g>
+    <!-- 4 -->
+    <g transform="translate(0,356)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Migrate DB to v2</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">api-server</text>
+      <rect x="660" y="12" width="297" height="16" rx="3" fill="#f0dcee" stroke="#c98fc2"/>
+      <circle cx="666" cy="20" r="4" fill="#6e2f68"/><circle cx="700" cy="20" r="4" fill="#6e2f68"/><circle cx="735" cy="20" r="4" fill="#6e2f68"/><circle cx="780" cy="20" r="4" fill="#6e2f68"/><circle cx="840" cy="20" r="4" fill="#6e2f68"/><circle cx="900" cy="20" r="4" fill="#6e2f68"/><circle cx="950" cy="20" r="4" fill="#6e2f68"/>
+    </g>
+    <!-- 5 -->
+    <g transform="translate(0,400)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Landing page redesign</text>
+      <rect x="250" y="11" width="80" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="290" y="24" fill="#6b7480" font-size="11" text-anchor="middle">marketing-site</text>
+      <rect x="792" y="12" width="66" height="16" rx="3" fill="#dcefe0" stroke="#8fc99f"/>
+      <circle cx="798" cy="20" r="4" fill="#2f6e3f"/><circle cx="820" cy="20" r="4" fill="#2f6e3f"/><circle cx="848" cy="20" r="4" fill="#2f6e3f"/>
+    </g>
+    <!-- 6 -->
+    <g transform="translate(0,444)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Write release notes v2.3</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">web-shop</text>
+      <rect x="1188" y="12" width="22" height="16" rx="3" fill="#dbe7fb" stroke="#7ea8e0"/>
+      <circle cx="1194" cy="20" r="4" fill="#21487f"/><circle cx="1204" cy="20" r="4" fill="#21487f"/>
+    </g>
+    <!-- 7 -->
+    <g transform="translate(0,488)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Push notifications setup</text>
+      <rect x="250" y="11" width="72" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="286" y="24" fill="#6b7480" font-size="11" text-anchor="middle">mobile-app</text>
+      <rect x="462" y="12" width="66" height="16" rx="3" fill="#f6ecd6" stroke="#d9b772"/>
+      <circle cx="468" cy="20" r="4" fill="#7a5a1a"/><circle cx="490" cy="20" r="4" fill="#7a5a1a"/><circle cx="520" cy="20" r="4" fill="#7a5a1a"/>
+    </g>
+    <!-- 8 -->
+    <g transform="translate(0,532)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">Cache layer for API</text>
+      <rect x="250" y="11" width="64" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="282" y="24" fill="#6b7480" font-size="11" text-anchor="middle">api-server</text>
+      <rect x="1056" y="12" width="33" height="16" rx="3" fill="#f0dcee" stroke="#c98fc2"/>
+      <circle cx="1062" cy="20" r="4" fill="#6e2f68"/><circle cx="1080" cy="20" r="4" fill="#6e2f68"/>
+    </g>
+    <!-- 9 -->
+    <g transform="translate(0,576)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">SEO meta tags &amp; sitemap</text>
+      <rect x="250" y="11" width="80" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="290" y="24" fill="#6b7480" font-size="11" text-anchor="middle">marketing-site</text>
+      <rect x="726" y="12" width="429" height="16" rx="3" fill="#dcefe0" stroke="#8fc99f"/>
+      <circle cx="732" cy="20" r="4" fill="#2f6e3f"/><circle cx="790" cy="20" r="4" fill="#2f6e3f"/><circle cx="860" cy="20" r="4" fill="#2f6e3f"/><circle cx="940" cy="20" r="4" fill="#2f6e3f"/><circle cx="1050" cy="20" r="4" fill="#2f6e3f"/><circle cx="1148" cy="20" r="4" fill="#2f6e3f"/>
+    </g>
+    <!-- 10 -->
+    <g transform="translate(0,620)">
+      <line x1="0" y1="40" x2="1280" y2="40" stroke="#eef1f5"/>
+      <circle cx="20" cy="20" r="5" fill="#9aa3af"/><text x="34" y="25" fill="#1b2330" font-weight="600">CI pipeline fixes</text>
+      <rect x="250" y="11" width="74" height="18" rx="6" fill="#f4f6f9" stroke="#e7eaef"/><text x="287" y="24" fill="#6b7480" font-size="11" text-anchor="middle">infra-scripts</text>
+      <rect x="396" y="12" width="33" height="16" rx="3" fill="#d6eded" stroke="#72b7b7"/>
+      <circle cx="402" cy="20" r="4" fill="#1a5a5a"/><circle cx="420" cy="20" r="4" fill="#1a5a5a"/>
+    </g>
+  </g>
+</svg>

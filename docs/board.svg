@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <rect width="1280" height="800" fill="#eef1f5"/>
+
+  <!-- header -->
+  <rect width="1280" height="52" fill="#ffffff"/>
+  <rect y="51" width="1280" height="1" fill="#dce0e6"/>
+  <rect x="18" y="14" width="24" height="24" rx="6" fill="#2563eb"/>
+  <text x="30" y="31" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">C</text>
+  <text x="52" y="33" fill="#1b2330" font-size="16" font-weight="700">Claude Sessions</text>
+  <circle cx="232" cy="27" r="5" fill="#16a34a"/><text x="242" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">2</tspan> active</text>
+  <circle cx="326" cy="27" r="5" fill="#d97706"/><text x="336" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">3</tspan> idle</text>
+  <text x="406" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">30</tspan> total</text>
+  <rect x="690" y="13" width="270" height="28" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <rect x="884" y="13" width="76" height="28" rx="8" fill="#2563eb"/>
+  <text x="736" y="31" fill="#6b7480" font-size="13" text-anchor="middle">List</text>
+  <text x="830" y="31" fill="#6b7480" font-size="13" text-anchor="middle">Timeline</text>
+  <text x="922" y="31" fill="#ffffff" font-size="13" font-weight="600" text-anchor="middle">Board</text>
+  <rect x="1000" y="12" width="210" height="30" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <text x="1014" y="31" fill="#9aa3af" font-size="13">Search…</text>
+  <rect x="1222" y="12" width="36" height="30" rx="8" fill="#ffffff" stroke="#dce0e6"/>
+  <circle cx="1240" cy="27" r="6" fill="none" stroke="#6b7480" stroke-width="1.5"/><circle cx="1240" cy="27" r="2" fill="#6b7480"/>
+
+  <!-- project tiles -->
+  <rect x="24" y="62" width="150" height="80" rx="10" fill="#f4f6f9" stroke="#2563eb" stroke-width="2"/>
+  <text x="38" y="132" fill="#1b2330" font-size="13" font-weight="700">All projects</text>
+  <text x="158" y="84" fill="#1b2330" font-size="13" font-weight="700" text-anchor="end">30</text>
+  <rect x="184" y="62" width="150" height="80" rx="10" fill="#3f7cc0"/><text x="198" y="132" fill="#fff" font-size="13" font-weight="700">web-shop</text>
+  <rect x="344" y="62" width="150" height="80" rx="10" fill="#9c4f93"/><text x="358" y="132" fill="#fff" font-size="13" font-weight="700">api-server</text>
+  <rect x="504" y="62" width="150" height="80" rx="10" fill="#5a9e6f"/><text x="518" y="132" fill="#fff" font-size="13" font-weight="700">marketing-site</text>
+  <rect x="664" y="62" width="150" height="80" rx="10" fill="#c08a3f"/><text x="678" y="132" fill="#fff" font-size="13" font-weight="700">mobile-app</text>
+  <rect x="824" y="62" width="150" height="80" rx="10" fill="#4f9c9c"/><text x="838" y="132" fill="#fff" font-size="13" font-weight="700">infra-scripts</text>
+
+  <!-- columns -->
+  <g>
+    <!-- column template: x positions 24, 334, 644, 954 ; width 296 -->
+    <!-- NEW -->
+    <rect x="24" y="160" width="296" height="624" rx="12" fill="#ffffff" stroke="#dce0e6"/>
+    <rect x="24" y="160" width="296" height="40" rx="12" fill="#f4f6f9"/>
+    <text x="40" y="185" fill="#6b7480" font-size="12" font-weight="700" letter-spacing="1">NEW</text>
+    <rect x="278" y="172" width="28" height="18" rx="9" fill="#eef1f5"/><text x="292" y="185" fill="#1b2330" font-size="12" font-weight="700" text-anchor="middle">1</text>
+    <!-- card -->
+    <rect x="38" y="214" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="56" cy="238" r="5" fill="#9aa3af"/><text x="70" y="242" fill="#1b2330" font-size="13.5" font-weight="600">Set up error tracking</text>
+    <text x="54" y="266" fill="#6b7480" font-size="12">mobile-app · ⎇ main · 1 h</text>
+    <text x="54" y="292" fill="#2563eb" font-size="12">View details →</text>
+
+    <!-- IN PROGRESS -->
+    <rect x="334" y="160" width="296" height="624" rx="12" fill="#ffffff" stroke="#dce0e6"/>
+    <rect x="334" y="160" width="296" height="40" rx="12" fill="#f4f6f9"/>
+    <text x="350" y="185" fill="#6b7480" font-size="12" font-weight="700" letter-spacing="1">IN PROGRESS</text>
+    <rect x="588" y="172" width="28" height="18" rx="9" fill="#eef1f5"/><text x="602" y="185" fill="#1b2330" font-size="12" font-weight="700" text-anchor="middle">3</text>
+
+    <rect x="348" y="214" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="366" cy="238" r="5" fill="#16a34a"/><text x="380" y="242" fill="#1b2330" font-size="13.5" font-weight="600">Fix checkout total rounding</text>
+    <text x="364" y="266" fill="#6b7480" font-size="12">web-shop · ⎇ main · 5 min</text>
+    <text x="364" y="292" fill="#2563eb" font-size="12">View details →</text>
+
+    <rect x="348" y="318" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="366" cy="342" r="5" fill="#d97706"/><text x="380" y="346" fill="#1b2330" font-size="13.5" font-weight="600">Refactor auth middleware</text>
+    <text x="364" y="370" fill="#6b7480" font-size="12">api-server · ⎇ main · 1 d</text>
+    <text x="364" y="396" fill="#2563eb" font-size="12">View details →</text>
+
+    <rect x="348" y="422" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="366" cy="446" r="5" fill="#9aa3af"/><text x="380" y="450" fill="#1b2330" font-size="13.5" font-weight="600">Landing page redesign</text>
+    <text x="364" y="474" fill="#6b7480" font-size="12">marketing-site · ⎇ main · 2 d</text>
+    <text x="364" y="500" fill="#2563eb" font-size="12">View details →</text>
+
+    <!-- WAITING -->
+    <rect x="644" y="160" width="296" height="624" rx="12" fill="#ffffff" stroke="#dce0e6"/>
+    <rect x="644" y="160" width="296" height="40" rx="12" fill="#f4f6f9"/>
+    <text x="660" y="185" fill="#6b7480" font-size="12" font-weight="700" letter-spacing="1">WAITING</text>
+    <rect x="898" y="172" width="28" height="18" rx="9" fill="#eef1f5"/><text x="912" y="185" fill="#1b2330" font-size="12" font-weight="700" text-anchor="middle">2</text>
+
+    <rect x="658" y="214" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="676" cy="238" r="5" fill="#9aa3af"/><text x="690" y="242" fill="#1b2330" font-size="13.5" font-weight="600">Add product search filters</text>
+    <text x="674" y="266" fill="#6b7480" font-size="12">web-shop · ⎇ feature/search · 2 h</text>
+    <text x="674" y="292" fill="#2563eb" font-size="12">View details →</text>
+
+    <rect x="658" y="318" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="676" cy="342" r="5" fill="#9aa3af"/><text x="690" y="346" fill="#1b2330" font-size="13.5" font-weight="600">Cache layer for API</text>
+    <text x="674" y="370" fill="#6b7480" font-size="12">api-server · ⎇ main · 3 d</text>
+    <text x="674" y="396" fill="#2563eb" font-size="12">View details →</text>
+
+    <!-- DONE -->
+    <rect x="954" y="160" width="296" height="624" rx="12" fill="#ffffff" stroke="#dce0e6"/>
+    <rect x="954" y="160" width="296" height="40" rx="12" fill="#f4f6f9"/>
+    <text x="970" y="185" fill="#6b7480" font-size="12" font-weight="700" letter-spacing="1">DONE</text>
+    <rect x="1208" y="172" width="28" height="18" rx="9" fill="#eef1f5"/><text x="1222" y="185" fill="#1b2330" font-size="12" font-weight="700" text-anchor="middle">2</text>
+
+    <rect x="968" y="214" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="986" cy="238" r="5" fill="#9aa3af"/><text x="1000" y="242" fill="#1b2330" font-size="13.5" font-weight="600">Write release notes v2.3</text>
+    <text x="984" y="266" fill="#6b7480" font-size="12">web-shop · ⎇ main · 3 d</text>
+    <text x="984" y="292" fill="#2563eb" font-size="12">View details →</text>
+
+    <rect x="968" y="318" width="268" height="92" rx="10" fill="#ffffff" stroke="#dce0e6"/>
+    <circle cx="986" cy="342" r="5" fill="#9aa3af"/><text x="1000" y="346" fill="#1b2330" font-size="13.5" font-weight="600">Migrate DB to v2</text>
+    <text x="984" y="370" fill="#6b7480" font-size="12">api-server · ⎇ main · 5 d</text>
+    <text x="984" y="396" fill="#2563eb" font-size="12">View details →</text>
+  </g>
+</svg>
