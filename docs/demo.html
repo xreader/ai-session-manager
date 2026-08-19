@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude Session Manager — demo</title>
+<style>
+  html,body{margin:0;height:100%;background:#0f1115;display:flex;align-items:center;justify-content:center;
+    font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  /* The 1280x800 stage — record exactly this box. */
+  .stage{position:relative;width:1280px;height:800px;overflow:hidden;background:#eef1f5;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);border-radius:10px}
+  .slide{position:absolute;inset:0;opacity:0;background-size:cover;background-position:top center;
+    animation:cycle 16s infinite}
+  .s1{background-image:url('list.svg');animation-delay:0s}
+  .s2{background-image:url('timeline.svg');animation-delay:-4s}
+  .s3{background-image:url('board.svg');animation-delay:-8s}
+  .s4{animation-delay:-12s;background:#0f1115}
+  /* caption bar */
+  .cap{position:absolute;left:0;right:0;bottom:0;padding:18px 26px;color:#fff;font-size:22px;font-weight:600;
+    background:linear-gradient(0deg,rgba(10,14,22,.86),rgba(10,14,22,0))}
+  .cap small{display:block;font-size:15px;font-weight:400;opacity:.85;margin-top:4px}
+  /* intro slide (s4) */
+  .intro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;text-align:center;gap:14px}
+  .intro .logo{width:64px;height:64px;border-radius:16px;background:#2563eb;display:flex;align-items:center;
+    justify-content:center;font-size:34px;font-weight:800}
+  .intro h1{font-size:40px;margin:6px 0 0}
+  .intro p{font-size:20px;opacity:.8;margin:0;max-width:760px}
+  @keyframes cycle{
+    0%{opacity:0} 3%{opacity:1} 22%{opacity:1} 26%{opacity:0} 100%{opacity:0}
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <!-- intro -->
+    <div class="slide s4">
+      <div class="intro">
+        <div class="logo">C</div>
+        <h1>Claude Session Manager</h1>
+        <p>Find and manage every Claude Code session on your machine —
+           even the ones you forgot you left running.</p>
+      </div>
+    </div>
+    <!-- list -->
+    <div class="slide s1"><div class="cap">All your sessions, grouped by project
+      <small>Live status · goal &amp; latest state · resume in one click</small></div></div>
+    <!-- timeline -->
+    <div class="slide s2"><div class="cap">See when each session ran
+      <small>An absolute timeline with activity markers</small></div></div>
+    <!-- board -->
+    <div class="slide s3"><div class="cap">Organize with a kanban board
+      <small>Drag sessions across your own columns</small></div></div>
+  </div>
+</body>
+</html>

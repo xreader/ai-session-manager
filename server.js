@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const readline = require('readline');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 
 let PORT = process.env.PORT || 4317; // may be overridden by settings before listen
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
@@ -14,6 +14,7 @@ const PROJECTS_DIR = path.join(CLAUDE_DIR, 'projects');
 const STATE_FILE = path.join(CLAUDE_DIR, 'session-manager-state.json'); // our own sidecar
 const CONFIG_FILE = path.join(CLAUDE_DIR, 'session-manager-config.json');
 const LANG_DIR = path.join(__dirname, 'lang');
+const DEFAULT_BACKUP_DIR = path.join(CLAUDE_DIR, 'session-backup');
 
 // Terminal launch templates per platform. {cwd} and {id} get substituted.
 const TERMINAL_PRESETS = {
@@ -54,6 +55,11 @@ const SETTINGS_SCHEMA = [
   ]},
   { group: 'group.terminal', items: [
     { key: 'terminal', type: 'terminal', label: 'set.terminal' },
+  ]},
+  { group: 'group.backup', items: [
+    { key: 'backupRemote', type: 'text', label: 'set.backupRemote', default: '' },
+    { key: 'backupIntervalHours', type: 'number', label: 'set.backupInterval', default: 6, min: 0, max: 168 },
+    { key: 'backupDir', type: 'text', label: 'set.backupDir', default: '' },
   ]},
 ];
 
@@ -246,6 +252,33 @@ async function scanSessions() {
     }
   }
 
+  // 2b) archived sessions: present only in the backup mirror (already cleaned up locally)
+  const bproj = path.join(backupDirPath(), 'projects');
+  let bdirs = [];
+  try { bdirs = fs.readdirSync(bproj); } catch {}
+  for (const dir of bdirs) {
+    let files = [];
+    try { files = fs.readdirSync(path.join(bproj, dir)).filter(f => f.endsWith('.jsonl')); } catch { continue; }
+    for (const f of files) {
+      const sessionId = f.replace(/\.jsonl$/, '');
+      if (sessions[sessionId]) continue; // still exists locally
+      const file = path.join(bproj, dir, f);
+      let st; try { st = fs.statSync(file); } catch { continue; }
+      const meta = parseTranscript(file, dir);
+      sessions[sessionId] = {
+        sessionId,
+        title: meta.customTitle || meta.aiTitle || meta.firstUserPrompt || '(ohne Titel)',
+        customTitle: meta.customTitle, aiTitle: meta.aiTitle,
+        cwd: meta.cwd, gitBranch: meta.gitBranch, version: meta.version,
+        lastPrompt: meta.lastPrompt || meta.firstUserPrompt,
+        firstUserPrompt: meta.firstUserPrompt,
+        sizeBytes: st.size, mtime: st.mtimeMs,
+        firstTs: meta.firstTs, lastTs: meta.lastTs,
+        archived: true,
+      };
+    }
+  }
+
   // 3) merge live info (include live-only sessions too)
   for (const [id, l] of Object.entries(live)) {
     if (!sessions[id]) {
@@ -263,8 +296,8 @@ async function scanSessions() {
     if (s.live && s.live.alive) {
       const idleMs = Date.now() - (s.lastActivity || 0);
       s.status = idleMs > 30 * 60 * 1000 ? 'idle' : 'running';
-    } else if (s.live && s.live.alive === false) {
-      s.status = 'closed';
+    } else if (s.archived) {
+      s.status = 'archived';
     } else {
       s.status = 'closed';
     }
@@ -274,13 +307,16 @@ async function scanSessions() {
   return Object.values(sessions).sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
 }
 
-// Locate the transcript file for a sessionId.
+// Locate the transcript file for a sessionId — live dir first, then the backup mirror.
 function findTranscript(id) {
-  let projDirs = [];
-  try { projDirs = fs.readdirSync(PROJECTS_DIR); } catch { return null; }
-  for (const dir of projDirs) {
-    const f = path.join(PROJECTS_DIR, dir, id + '.jsonl');
-    if (fs.existsSync(f)) return f;
+  const bases = [PROJECTS_DIR, path.join(backupDirPath(), 'projects')];
+  for (const base of bases) {
+    let projDirs = [];
+    try { projDirs = fs.readdirSync(base); } catch { continue; }
+    for (const dir of projDirs) {
+      const f = path.join(base, dir, id + '.jsonl');
+      if (fs.existsSync(f)) return f;
+    }
   }
   return null;
 }
@@ -409,6 +445,162 @@ async function timelineData() {
   return res;
 }
 
+// ---------- git backup status ----------
+const projGitCache = {}; // cwd -> {t, status}
+function gitStatus(dir) {
+  const c = projGitCache[dir];
+  if (c && Date.now() - c.t < 10000) return c.status;
+  const run = args => {
+    try { return execSync(`git -C "${dir}" ${args}`, { stdio: ['ignore', 'pipe', 'ignore'], timeout: 15000 }).toString().trim(); }
+    catch { return null; }
+  };
+  const s = { git: false, remote: null, branch: null, dirty: false, ahead: 0, hasUpstream: false, lastCommit: null };
+  if (run('rev-parse --is-inside-work-tree') === 'true') {
+    s.git = true;
+    s.remote = run('config --get remote.origin.url');
+    s.branch = run('rev-parse --abbrev-ref HEAD');
+    s.dirty = !!run('status --porcelain');
+    s.lastCommit = run('log -1 --format=%cI');
+    const up = run('rev-parse --abbrev-ref --symbolic-full-name @{u}');
+    if (up) { s.hasUpstream = true; const n = run('rev-list --count @{u}..HEAD'); s.ahead = n ? (parseInt(n, 10) || 0) : 0; }
+  }
+  projGitCache[dir] = { t: Date.now(), status: s };
+  return s;
+}
+// unique project folders (from session cwds) + their backup status
+async function listProjects() {
+  const sessions = await scanSessions();
+  const map = {};
+  for (const s of sessions) {
+    if (!s.cwd) continue;
+    const key = s.cwd.toLowerCase();
+    if (!map[key]) map[key] = { cwd: s.cwd, project: s.project, sessions: 0, lastActivity: 0 };
+    map[key].sessions++;
+    map[key].lastActivity = Math.max(map[key].lastActivity, s.lastActivity || 0);
+  }
+  const out = [];
+  for (const p of Object.values(map)) {
+    let exists = true;
+    try { fs.accessSync(p.cwd); } catch { exists = false; }
+    out.push(Object.assign({}, p, { exists, git: exists ? gitStatus(p.cwd) : null }));
+  }
+  out.sort((a, b) => b.lastActivity - a.lastActivity);
+  return out;
+}
+
+// ---------- session-history backup ----------
+function backupDirPath() { const d = loadSettings().backupDir; return (d && d.trim()) ? d.trim() : DEFAULT_BACKUP_DIR; }
+let backupState = { running: false, lastBackup: null, lastResult: null };
+
+function walkJsonl(root, rel, cb) {
+  let ents = [];
+  try { ents = fs.readdirSync(root, { withFileTypes: true }); } catch { return; }
+  for (const e of ents) {
+    const full = path.join(root, e.name);
+    const r = rel ? rel + '/' + e.name : e.name;
+    if (e.isDirectory()) walkJsonl(full, r, cb);
+    else if (e.name.endsWith('.jsonl')) cb(full, r);
+  }
+}
+function gitRun(dir, args) { return execSync(`git -C "${dir}" ${args}`, { stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000 }).toString(); }
+
+async function backupSessions() {
+  if (backupState.running) return backupState.lastResult || { ok: false, error: 'already running' };
+  backupState.running = true;
+  const dir = backupDirPath();
+  const res = { ok: false, copied: 0, committed: false, pushed: false, dir, remote: '', error: null, ts: Date.now() };
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    let isRepo = false;
+    try { if (gitRun(dir, 'rev-parse --is-inside-work-tree').trim() === 'true') isRepo = true; } catch {}
+    if (!isRepo) gitRun(dir, 'init');
+    // incremental copy of all transcripts into <dir>/projects mirror
+    const destRoot = path.join(dir, 'projects');
+    walkJsonl(PROJECTS_DIR, '', (full, rel) => {
+      const dst = path.join(destRoot, rel);
+      let need = true;
+      try { const a = fs.statSync(full), b = fs.statSync(dst); need = (a.size !== b.size || a.mtimeMs > b.mtimeMs); } catch { need = true; }
+      if (need) { fs.mkdirSync(path.dirname(dst), { recursive: true }); fs.copyFileSync(full, dst); res.copied++; }
+    });
+    gitRun(dir, 'add -A');
+    try { gitRun(dir, `commit -m "Session backup ${new Date().toISOString()}"`); res.committed = true; }
+    catch { /* nothing to commit */ }
+    const remote = (loadSettings().backupRemote || '').trim();
+    res.remote = remote;
+    if (remote) {
+      let hasOrigin = false;
+      try { gitRun(dir, 'remote get-url origin'); hasOrigin = true; } catch {}
+      if (!hasOrigin) gitRun(dir, `remote add origin "${remote}"`);
+      else { try { if (gitRun(dir, 'remote get-url origin').trim() !== remote) gitRun(dir, `remote set-url origin "${remote}"`); } catch {} }
+      const br = (gitRun(dir, 'rev-parse --abbrev-ref HEAD').trim()) || 'master';
+      gitRun(dir, `push -u origin ${br}`); res.pushed = true;
+    }
+    res.ok = true;
+  } catch (e) { res.error = (e.stderr && e.stderr.toString()) || e.message; }
+  backupState.running = false; backupState.lastBackup = res.ts; backupState.lastResult = res;
+  return res;
+}
+
+// ---------- full-text search over transcripts ----------
+function makeSnippet(text, term) {
+  const i = text.toLowerCase().indexOf(term);
+  if (i < 0) return null;
+  const start = Math.max(0, i - 60), end = Math.min(text.length, i + term.length + 90);
+  return (start > 0 ? '…' : '') + text.slice(start, end).replace(/\s+/g, ' ').trim() + (end < text.length ? '…' : '');
+}
+function searchFile(file, terms) {
+  return new Promise(resolve => {
+    const seen = new Set(); let count = 0; const snippets = [];
+    const rl = readline.createInterface({ input: fs.createReadStream(file, { encoding: 'utf8' }), crlfDelay: Infinity });
+    rl.on('line', line => {
+      const low = line.toLowerCase();
+      let hit = null;
+      for (const term of terms) if (low.indexOf(term) >= 0) { seen.add(term); if (!hit) hit = term; }
+      if (hit) {
+        count++;
+        if (snippets.length < 3) {
+          try {
+            const d = JSON.parse(line.trim());
+            if (d.type === 'user' || d.type === 'assistant') {
+              const txt = extractText(d.message && d.message.content);
+              const sn = txt && makeSnippet(txt, hit);
+              if (sn) snippets.push({ role: d.type, text: sn });
+            }
+          } catch {}
+        }
+      }
+    });
+    rl.on('close', () => resolve({ matchedAll: terms.every(t => seen.has(t)), count, snippets }));
+    rl.on('error', () => resolve({ matchedAll: false, count: 0, snippets: [] }));
+  });
+}
+async function searchTranscripts(q) {
+  const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  const seenIds = new Set(); const files = [];
+  for (const base of [PROJECTS_DIR, path.join(backupDirPath(), 'projects')]) {
+    let dirs = [];
+    try { dirs = fs.readdirSync(base); } catch { continue; }
+    for (const d of dirs) {
+      let list = [];
+      try { list = fs.readdirSync(path.join(base, d)).filter(f => f.endsWith('.jsonl')); } catch { continue; }
+      for (const f of list) {
+        const id = f.replace(/\.jsonl$/, '');
+        if (seenIds.has(id)) continue;
+        seenIds.add(id);
+        files.push({ id, file: path.join(base, d, f) });
+      }
+    }
+  }
+  const results = [];
+  for (const { id, file } of files) {
+    const r = await searchFile(file, terms);
+    if (r.matchedAll) results.push({ sessionId: id, count: r.count, snippets: r.snippets });
+  }
+  results.sort((a, b) => b.count - a.count);
+  return results.slice(0, 100);
+}
+
 // ---------- http ----------
 function send(res, code, body, type = 'application/json') {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
@@ -445,6 +637,47 @@ const server = http.createServer(async (req, res) => {
       const id = url.searchParams.get('id');
       if (!id) return send(res, 400, { error: 'id fehlt' });
       return send(res, 200, await sessionDetail(id));
+    }
+    if (url.pathname === '/api/projects') {
+      return send(res, 200, { projects: await listProjects() });
+    }
+    if (url.pathname === '/api/backup-status') {
+      const cfg = loadSettings();
+      return send(res, 200, {
+        dir: backupDirPath(), remote: (cfg.backupRemote || '').trim(),
+        intervalHours: +cfg.backupIntervalHours || 0,
+        running: backupState.running, lastBackup: backupState.lastBackup, lastResult: backupState.lastResult,
+      });
+    }
+    if (url.pathname === '/api/backup-run' && req.method === 'POST') {
+      return send(res, 200, await backupSessions());
+    }
+    if (url.pathname === '/api/git-push' && req.method === 'POST') {
+      const { cwd, commit } = await readBody(req);
+      if (!cwd) return send(res, 400, { ok: false, error: 'cwd fehlt' });
+      const steps = [];
+      const run = (args, label) => {
+        try {
+          const o = execSync(`git -C "${cwd}" ${args}`, { stdio: ['ignore', 'pipe', 'pipe'], timeout: 120000 }).toString();
+          steps.push({ label, ok: true, out: o.trim() }); return true;
+        } catch (e) {
+          steps.push({ label, ok: false, out: ((e.stdout && e.stdout.toString()) || '') + ((e.stderr && e.stderr.toString()) || e.message) });
+          return false;
+        }
+      };
+      if (commit) {
+        run('add -A', 'add');
+        try { execSync(`git -C "${cwd}" commit -m "Backup ${new Date().toISOString()}"`, { stdio: ['ignore', 'pipe', 'pipe'] }); steps.push({ label: 'commit', ok: true }); }
+        catch { steps.push({ label: 'commit', ok: true, out: 'nothing to commit' }); }
+      }
+      const ok = run('push', 'push');
+      delete projGitCache[cwd];
+      return send(res, 200, { ok, steps });
+    }
+    if (url.pathname === '/api/search') {
+      const q = (url.searchParams.get('q') || '').trim();
+      if (!q) return send(res, 200, { q, results: [] });
+      return send(res, 200, { q, results: await searchTranscripts(q) });
     }
     if (url.pathname === '/api/thumb') {
       const id = url.searchParams.get('id');
@@ -506,4 +739,8 @@ PORT = process.env.PORT || loadSettings().port || PORT;
 server.listen(PORT, () => {
   console.log(`Claude Session Manager -> http://localhost:${PORT}`);
   console.log(`Scanning: ${CLAUDE_DIR}`);
+  // auto-backup: run shortly after start, then on the configured interval
+  setTimeout(() => { backupSessions().then(r => console.log(`Backup: ${r.copied} new file(s), committed=${r.committed}, pushed=${r.pushed}${r.error ? ', error: ' + r.error : ''}`)); }, 4000);
+  const hrs = +loadSettings().backupIntervalHours || 0;
+  if (hrs > 0) setInterval(() => backupSessions(), hrs * 3600 * 1000);
 });

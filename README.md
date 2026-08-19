@@ -10,13 +10,15 @@
 Claude Code stores every session centrally under `~/.claude`. Once you work across many
 projects, it gets hard to remember **what you started, where, and whether it's still running.**
 This tool reads that data (read‑only) and gives you one clean overview — as a **list**, a
-**timeline**, or a **kanban board**.
+**timeline**, or a **kanban board** — with **full‑text search** and **backup** built in.
+
+![Claude Session Manager — board view](docs/dashboard.png)
 
 > ⚠️ Unofficial community project. Not affiliated with or endorsed by Anthropic.
 
 ---
 
-## Screenshots
+## More views
 
 **List + detail** — all sessions grouped by project, with a rich detail panel:
 
@@ -25,10 +27,6 @@ This tool reads that data (read‑only) and gives you one clean overview — as 
 **Timeline** — an absolute time axis showing when each session ran, with activity markers:
 
 ![Timeline view](docs/timeline.svg)
-
-**Board** — drag sessions across your own kanban columns:
-
-![Board view](docs/board.svg)
 
 ---
 
@@ -48,7 +46,9 @@ Claude Session Manager solves exactly that.
   - 💬 full **prompt history**, 🖼️ **image gallery** (screenshots pasted into the session), message counts, duration, branch, PID, folder.
 - ⧗ **Timeline (Gantt)** — a single absolute time axis (years → months → days) showing **when** each session ran, with prompt markers for activity.
 - ▦ **Board (Kanban)** — drag sessions across your own columns to organize your workflow.
-- 🎴 **Visual project filter** — project tiles with a representative image (or color).
+- 🔍 **Full‑text search** across **all transcripts** — prompts **and** answers. Find the session by *what was said in it*, with highlighted snippets ranked by relevance.
+- 💾 **Backup** (see below) — one‑click git push per project, plus automatic session‑history backup that survives Claude's auto‑cleanup.
+- 🎴 **Visual project filter** (tiles) · 🏷️ **status filter chips** · ⌨️ **keyboard navigation** (`/` search, ↑/↓ select, `Esc` clear).
 - ▶ **Resume** a forgotten session in a new terminal, 📂 **open its folder**, 📝 add **notes**.
 - 🌗 **Light & dark theme**, 🌍 **multi‑language** (English/German included), all configurable.
 - 🔌 **Config‑first** — almost everything is driven by a settings schema (a stepping stone toward a plugin system).
@@ -60,16 +60,36 @@ It reads, **read‑only**, from your local `~/.claude` directory:
 | Source | Used for |
 |---|---|
 | `~/.claude/sessions/<pid>.json` | running sessions (live status) |
-| `~/.claude/projects/*/*.jsonl` | transcripts → titles, goal, prompts, images, timing |
+| `~/.claude/projects/*/*.jsonl` | transcripts → titles, goal, prompts, images, timing, full‑text search |
+| `~/.claude/session-backup/` (own git repo) | backed‑up transcripts → also read to show *archived* (cleaned‑up) sessions |
 
-Your own data (kanban columns, notes) is stored in a separate sidecar file
-(`~/.claude/session-manager-state.json`). **The original Claude Code files are never modified.**
+Your own data (kanban columns, notes) and settings live in separate sidecar files
+(`~/.claude/session-manager-state.json`, `session-manager-config.json`).
+**The original Claude Code files are never modified.**
 
 ## Privacy
 
 - 100% **local**. Nothing is uploaded anywhere — it's a plain Node HTTP server on `localhost`.
 - The web UI is only served to your machine (default `http://localhost:4317`).
 - Read‑only access to your sessions; writes go only to its own sidecar/config files.
+
+## Backup
+
+The **Backup** tab has two independent parts:
+
+**1. Per‑project git status & push.** For every folder your sessions live in, it shows whether it's
+safely backed up — *backed up* ✅, *N unpushed* ⬆, *uncommitted changes* ●, *no remote* ⚠, or *not a
+git repo*. One click **pushes** to the project's existing remote (uses your cached git credentials —
+no token needed), or **commits & pushes** all changes (with a confirmation).
+
+**2. Session‑history backup.** Claude Code auto‑deletes local transcripts older than
+`cleanupPeriodDays` (default **30 days**) — so old conversations, *including the assistant's answers*,
+silently disappear. This tool can copy the **full transcripts** into a git repo (incremental, on a
+schedule + on start). Backed‑up sessions **stay readable inside the tool even after Claude deletes
+them** (shown as *archived*). Set a private `backupRemote` in ⚙ to also push off‑machine.
+
+> Tip: also raise `cleanupPeriodDays` in `~/.claude/settings.json` (e.g. `365`) to keep transcripts
+> locally longer — the backup repo is the real off‑disk safety net.
 
 ## Requirements
 
@@ -78,8 +98,8 @@ Your own data (kanban columns, notes) is stored in a separate sidecar file
 ## Install & run
 
 ```bash
-git clone https://github.com/<you>/claude-session-manager.git
-cd claude-session-manager
+git clone https://github.com/xreader/ai-session-manager.git
+cd ai-session-manager
 node server.js
 ```
 
@@ -101,6 +121,8 @@ Open ⚙ in the top‑right. Everything is stored in `~/.claude/session-manager-
   - macOS: Terminal.app, iTerm
   - Linux: gnome‑terminal, konsole, xterm
   - …or a **custom command** with `{cwd}` and `{id}` placeholders.
+- **Backup**: optional `backupRemote` (git URL for off‑machine push), auto‑backup interval (hours),
+  and backup folder.
 
 ### Adding a language
 
@@ -111,11 +133,13 @@ Copy `lang/en.json`, translate the values, set `"_name"` (e.g. `"Français"`), s
 
 - 🧠 **Support more AI assistants**, not just Claude Code — pluggable “session providers” for
   other coding agents/CLIs (e.g. tools that keep local session/transcript data).
-- 🔍 **Full‑text search** across all transcripts.
 - 🔔 **Notifications** for forgotten/idle running sessions.
-- 🌿 **Optional git status** per session folder (uncommitted changes, ahead/behind).
+- 🗜️ **Compressed off‑site backup** (gzip transcripts) so large histories push cleanly to GitHub.
 - 📈 **Activity pulse** (GitHub‑style) instead of single dots in the timeline.
 - 🧩 **Plugin system** — contribute views, columns, commands and settings via drop‑in modules.
+
+Recently shipped: 🔍 full‑text search · 💾 per‑project git backup + session‑history backup ·
+🏷️ status filters · ⌨️ keyboard nav · 🌗 dark mode.
 
 Ideas and feedback welcome — open an issue!
 
