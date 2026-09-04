@@ -12,3 +12,7 @@ Thumbs.db
 session-manager-config.json
 session-manager-state.json
 *.local.json
+
+# editor/backup cruft
+*.bak
+*.bak-*
