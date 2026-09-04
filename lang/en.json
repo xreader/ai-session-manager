@@ -1,6 +1,6 @@
 {
   "_name": "English",
-  "app.title": "🗂️ Claude Sessions",
+  "app.title": "Claude Sessions",
   "stat.active": "active",
   "stat.idle": "idle",
   "stat.total": "total",
@@ -10,20 +10,16 @@
   "search.placeholder": "Search…",
   "settings.btnTitle": "Settings",
   "proj.all": "All projects",
-
   "list.selectHint": "← Select a session for details",
   "common.noMatches": "No matches.",
   "detail.loading": "Loading details…",
-
   "status.running": "running",
   "status.idle": "idle",
   "status.closed": "closed",
-
   "btn.resume": "▶ Resume",
   "btn.openFolder": "📂 Open folder",
   "btn.cancel": "Cancel",
   "btn.save": "Save",
-
   "meta.project": "Project",
   "meta.branch": "Branch",
   "meta.messages": "Messages",
@@ -33,16 +29,13 @@
   "meta.duration": "Duration",
   "meta.pid": "PID",
   "meta.folder": "Folder",
-
   "sec.goal": "🎯 Session goal",
   "sec.last": "📍 Latest state",
   "sec.note": "📝 Note",
   "sec.images": "🖼️ Images from the session",
   "sec.prompts": "💬 Prompt history",
   "note.placeholder": "Your notes…",
-
   "board.openDetails": "View details →",
-
   "view.backup": "💾 Backup",
   "backup.status.backedup": "Backed up",
   "backup.status.ahead": "{n} unpushed",
@@ -70,7 +63,6 @@
   "backup.localOnly": "local only — set a remote in ⚙ to also push off-machine",
   "backup.remoteLabel": "Remote",
   "backup.filesNew": "{n} new file(s)",
-
   "status.archived": "archived",
   "filter.all": "All",
   "filter.running": "Running",
@@ -86,29 +78,24 @@
   "set.backupRemote": "Backup remote (git URL, optional)",
   "set.backupInterval": "Auto-backup interval (hours, 0 = off)",
   "set.backupDir": "Backup folder (empty = default)",
-
   "tl.loading": "Loading timeline… (first analysis of all sessions)",
   "tl.error": "Loading error.",
   "tl.prompts": "Prompts",
   "tl.until": "to",
-
   "time.now": "just now",
   "time.min": "min",
   "time.hour": "h",
   "time.day": "d",
-
   "settings.modalTitle": "⚙ Settings",
   "settings.preview": "Preview",
   "term.custom": "Custom command…",
   "term.placeholderHint": "Placeholders: {cwd} = project folder · {id} = session ID",
   "term.empty": "(empty)",
-
   "sync.saved": "⚙ Settings saved",
   "sync.portNote": " — port active after restart",
   "sync.resuming": "▶ Resuming in a new terminal…",
   "sync.folder": "📂 Folder opened…",
   "alert.noCwd": "No folder (cwd) known for this session.",
-
   "group.general": "General",
   "group.kanban": "Kanban",
   "group.terminal": "Terminal for \"Resume\"",

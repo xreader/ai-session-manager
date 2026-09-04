@@ -12,7 +12,7 @@ projects, it gets hard to remember **what you started, where, and whether it's s
 This tool reads that data (read‑only) and gives you one clean overview — as a **list**, a
 **timeline**, or a **kanban board** — with **full‑text search** and **backup** built in.
 
-![Claude Session Manager — board view](docs/dashboard.png)
+![Claude Session Manager — board view](docs/board.svg)
 
 > ⚠️ Unofficial community project. Not affiliated with or endorsed by Anthropic.
 

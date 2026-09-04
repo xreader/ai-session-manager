@@ -1,6 +1,6 @@
 {
   "_name": "Deutsch",
-  "app.title": "🗂️ Claude Sessions",
+  "app.title": "Claude Sessions",
   "stat.active": "aktiv",
   "stat.idle": "idle",
   "stat.total": "gesamt",
@@ -10,20 +10,16 @@
   "search.placeholder": "Suchen…",
   "settings.btnTitle": "Einstellungen",
   "proj.all": "Alle Projekte",
-
   "list.selectHint": "← Session auswählen für Details",
   "common.noMatches": "Keine Treffer.",
   "detail.loading": "Lade Details…",
-
   "status.running": "läuft",
   "status.idle": "idle",
   "status.closed": "beendet",
-
   "btn.resume": "▶ Fortsetzen",
   "btn.openFolder": "📂 Ordner öffnen",
   "btn.cancel": "Abbrechen",
   "btn.save": "Speichern",
-
   "meta.project": "Projekt",
   "meta.branch": "Branch",
   "meta.messages": "Nachrichten",
@@ -33,16 +29,13 @@
   "meta.duration": "Dauer",
   "meta.pid": "PID",
   "meta.folder": "Ordner",
-
   "sec.goal": "🎯 Ziel der Session",
   "sec.last": "📍 Letzter Stand",
   "sec.note": "📝 Notiz",
   "sec.images": "🖼️ Bilder aus der Session",
   "sec.prompts": "💬 Prompt-Verlauf",
   "note.placeholder": "Eigene Notizen…",
-
   "board.openDetails": "Details ansehen →",
-
   "view.backup": "💾 Backup",
   "backup.status.backedup": "Gesichert",
   "backup.status.ahead": "{n} ungepusht",
@@ -70,7 +63,6 @@
   "backup.localOnly": "nur lokal — Remote in ⚙ setzen für Off-Site-Sicherung",
   "backup.remoteLabel": "Remote",
   "backup.filesNew": "{n} neue Datei(en)",
-
   "status.archived": "archiviert",
   "filter.all": "Alle",
   "filter.running": "Läuft",
@@ -86,29 +78,24 @@
   "set.backupRemote": "Backup-Remote (Git-URL, optional)",
   "set.backupInterval": "Auto-Backup-Intervall (Stunden, 0 = aus)",
   "set.backupDir": "Backup-Ordner (leer = Standard)",
-
   "tl.loading": "Lade Zeitleiste… (erste Analyse aller Sessions)",
   "tl.error": "Fehler beim Laden.",
   "tl.prompts": "Prompts",
   "tl.until": "bis",
-
   "time.now": "gerade eben",
   "time.min": "min",
   "time.hour": "h",
   "time.day": "T",
-
   "settings.modalTitle": "⚙ Einstellungen",
   "settings.preview": "Vorschau",
   "term.custom": "Eigener Befehl…",
   "term.placeholderHint": "Platzhalter: {cwd} = Projektordner · {id} = Session-ID",
   "term.empty": "(leer)",
-
   "sync.saved": "⚙ Einstellungen gespeichert",
   "sync.portNote": " — Port erst nach Neustart aktiv",
   "sync.resuming": "▶ Wird in neuem Terminal fortgesetzt…",
   "sync.folder": "📂 Ordner geöffnet…",
   "alert.noCwd": "Kein Ordner (cwd) für diese Session bekannt.",
-
   "group.general": "Allgemein",
   "group.kanban": "Kanban",
   "group.terminal": "Terminal für „Fortsetzen\"",

@@ -4,14 +4,14 @@
   <!-- header -->
   <rect width="1280" height="52" fill="#ffffff"/>
   <rect y="51" width="1280" height="1" fill="#dce0e6"/>
-  <rect x="18" y="14" width="24" height="24" rx="6" fill="#2563eb"/>
+  <rect x="18" y="14" width="24" height="24" rx="6" fill="#4f46e5"/>
   <text x="30" y="31" fill="#ffffff" font-size="14" font-weight="700" text-anchor="middle">C</text>
   <text x="52" y="33" fill="#1b2330" font-size="16" font-weight="700">Claude Sessions</text>
   <circle cx="232" cy="27" r="5" fill="#16a34a"/><text x="242" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">2</tspan> active</text>
   <circle cx="326" cy="27" r="5" fill="#d97706"/><text x="336" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">3</tspan> idle</text>
   <text x="406" y="31" fill="#6b7480" font-size="13"><tspan fill="#1b2330" font-weight="700">30</tspan> total</text>
   <rect x="690" y="13" width="270" height="28" rx="8" fill="#ffffff" stroke="#dce0e6"/>
-  <rect x="784" y="13" width="92" height="28" rx="8" fill="#2563eb"/>
+  <rect x="784" y="13" width="92" height="28" rx="8" fill="#4f46e5"/>
   <text x="736" y="31" fill="#6b7480" font-size="13" text-anchor="middle">List</text>
   <text x="830" y="31" fill="#ffffff" font-size="13" font-weight="600" text-anchor="middle">Timeline</text>
   <text x="930" y="31" fill="#6b7480" font-size="13" text-anchor="middle">Board</text>
@@ -21,7 +21,7 @@
   <circle cx="1240" cy="27" r="6" fill="none" stroke="#6b7480" stroke-width="1.5"/><circle cx="1240" cy="27" r="2" fill="#6b7480"/>
 
   <!-- project tiles -->
-  <rect x="24" y="62" width="150" height="80" rx="10" fill="#f4f6f9" stroke="#2563eb" stroke-width="2"/>
+  <rect x="24" y="62" width="150" height="80" rx="10" fill="#f4f6f9" stroke="#4f46e5" stroke-width="2"/>
   <text x="38" y="132" fill="#1b2330" font-size="13" font-weight="700">All projects</text>
   <text x="158" y="84" fill="#1b2330" font-size="13" font-weight="700" text-anchor="end">30</text>
   <rect x="184" y="62" width="150" height="80" rx="10" fill="#3f7cc0"/><text x="198" y="132" fill="#fff" font-size="13" font-weight="700">web-shop</text>
