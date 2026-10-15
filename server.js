@@ -15,6 +15,16 @@ const STATE_FILE = path.join(CLAUDE_DIR, 'session-manager-state.json'); // our o
 const CONFIG_FILE = path.join(CLAUDE_DIR, 'session-manager-config.json');
 const LANG_DIR = path.join(__dirname, 'lang');
 const DEFAULT_BACKUP_DIR = path.join(CLAUDE_DIR, 'session-backup');
+const CODEX_SESSIONS_DIR = path.join(os.homedir(), '.codex', 'sessions');
+function cursorUserDir() {
+  if (process.platform === 'win32') return path.join(process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'), 'Cursor', 'User');
+  if (process.platform === 'darwin') return path.join(os.homedir(), 'Library', 'Application Support', 'Cursor', 'User');
+  return path.join(os.homedir(), '.config', 'Cursor', 'User');
+}
+// lazy node:sqlite (Cursor stores chats in SQLite). Null if unavailable.
+let _sqlite, _sqliteTried = false;
+function sqliteMod() { if (_sqliteTried) return _sqlite; _sqliteTried = true; try { _sqlite = require('node:sqlite'); } catch { _sqlite = null; } return _sqlite; }
+let _codexCache = null, _cursorCache = null, _scanCache = null;
 
 // Terminal launch templates per platform. {cwd} and {id} get substituted.
 const TERMINAL_PRESETS = {
@@ -208,6 +218,7 @@ function getAlivePids() {
 }
 
 async function scanSessions() {
+  if (_scanCache && Date.now() - _scanCache.t < 3000) return _scanCache.list;
   // 1) live session files (by PID)
   const live = {}; // sessionId -> liveInfo
   let liveFiles = [];
@@ -290,7 +301,12 @@ async function scanSessions() {
     // derive lastActivity
     s.lastActivity = Math.max(s.mtime || 0, l.updatedAt || 0, l.startedAt || 0);
   }
+  // 3b) other providers (OpenAI Codex, Cursor) — tagged by source
+  try { for (const cs of codexSessions()) sessions[cs.sessionId] = cs; } catch (e) { console.error('codex scan:', e.message); }
+  try { for (const cu of cursorSessions()) sessions[cu.sessionId] = cu; } catch (e) { console.error('cursor scan:', e.message); }
+
   for (const s of Object.values(sessions)) {
+    if (!s.source) s.source = 'claude';
     if (!s.lastActivity) s.lastActivity = s.mtime || 0;
     // live status: green=alive&recent, yellow=alive&stale(>30min idle), black=not running
     if (s.live && s.live.alive) {
@@ -304,7 +320,9 @@ async function scanSessions() {
     s.project = s.cwd ? s.cwd.split(/[\\/]/).filter(Boolean).pop() : '?';
   }
 
-  return Object.values(sessions).sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+  const list = Object.values(sessions).sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+  _scanCache = { t: Date.now(), list };
+  return list;
 }
 
 // Locate the transcript file for a sessionId — live dir first, then the backup mirror.
@@ -323,6 +341,8 @@ function findTranscript(id) {
 
 // Full parse of a single session (on demand): summary, prompt history, images.
 function sessionDetail(id) {
+  if (id.startsWith('codex:')) return codexDetail(id);
+  if (id.startsWith('cursor:')) return Promise.resolve(cursorDetail(id));
   return new Promise(resolve => {
     const file = findTranscript(id);
     if (!file) return resolve({ error: 'Session-Datei nicht gefunden' });
@@ -599,6 +619,140 @@ async function searchTranscripts(q) {
   }
   results.sort((a, b) => b.count - a.count);
   return results.slice(0, 100);
+}
+
+// ---------- provider: Codex (OpenAI) — ~/.codex/sessions/YYYY/MM/DD/rollout-<id>.jsonl ----------
+function codexText(content) {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) return content.map(c => (c && typeof c === 'object' ? (c.text || '') : '')).join(' ').trim();
+  return '';
+}
+function codexFile(id) { // id = "<ISO-ish>-<uuid>"; path encodes the date
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(id)) return null;
+  return path.join(CODEX_SESSIONS_DIR, id.slice(0, 4), id.slice(5, 7), id.slice(8, 10), 'rollout-' + id + '.jsonl');
+}
+function parseCodex(file) {
+  const meta = { cwd: null, firstTs: null, lastTs: null, firstUserPrompt: null, lastPrompt: null };
+  let content; try { content = readHeadTail(file); } catch { return meta; }
+  const scan = (text, isHead) => {
+    for (const line of text.split('\n')) {
+      const s = line.trim(); if (!s || s[0] !== '{') continue;
+      let d; try { d = JSON.parse(s); } catch { continue; }
+      if (d.timestamp) { if (!meta.firstTs) meta.firstTs = d.timestamp; meta.lastTs = d.timestamp; }
+      if (d.type === 'session_meta' && d.payload && d.payload.cwd && !meta.cwd) meta.cwd = d.payload.cwd;
+      if (d.type === 'response_item' && d.payload && d.payload.type === 'message' && d.payload.role === 'user') {
+        const t = codexText(d.payload.content);
+        if (t && t.length > 1 && t[0] !== '<') { if (isHead && !meta.firstUserPrompt) meta.firstUserPrompt = t.slice(0, 240); meta.lastPrompt = t.slice(0, 240); }
+      }
+    }
+  };
+  scan(content.head, true); if (content.tail) scan(content.tail, false);
+  return meta;
+}
+function codexSessions() {
+  if (_codexCache && Date.now() - _codexCache.t < 15000) return _codexCache.list;
+  const out = [];
+  const rec = dir => {
+    let ents = []; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of ents) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) rec(full);
+      else if (e.name.startsWith('rollout-') && e.name.endsWith('.jsonl')) {
+        let st; try { st = fs.statSync(full); } catch { continue; }
+        const id = e.name.replace(/^rollout-/, '').replace(/\.jsonl$/, '');
+        const m = parseCodex(full);
+        out.push({
+          sessionId: 'codex:' + id, source: 'codex', file: full,
+          title: m.firstUserPrompt || m.lastPrompt || '(Codex session)',
+          cwd: m.cwd, lastPrompt: m.lastPrompt || m.firstUserPrompt, firstUserPrompt: m.firstUserPrompt,
+          sizeBytes: st.size, mtime: st.mtimeMs, firstTs: m.firstTs, lastTs: m.lastTs,
+        });
+      }
+    }
+  };
+  rec(CODEX_SESSIONS_DIR);
+  _codexCache = { t: Date.now(), list: out };
+  return out;
+}
+function codexDetail(id) {
+  return new Promise(resolve => {
+    const file = codexFile(id.replace(/^codex:/, ''));
+    if (!file || !fs.existsSync(file)) return resolve({ error: 'Codex-Datei nicht gefunden' });
+    const out = { sessionId: id, source: 'codex', file, messageCount: 0, userCount: 0, assistantCount: 0, prompts: [], images: [], firstTs: null, lastTs: null, cwd: null };
+    const rl = readline.createInterface({ input: fs.createReadStream(file, { encoding: 'utf8' }), crlfDelay: Infinity });
+    rl.on('line', line => {
+      const s = line.trim(); if (!s || s[0] !== '{') return;
+      let d; try { d = JSON.parse(s); } catch { return; }
+      if (d.type === 'session_meta' && d.payload && d.payload.cwd) out.cwd = d.payload.cwd;
+      if (d.timestamp) { if (!out.firstTs) out.firstTs = d.timestamp; out.lastTs = d.timestamp; }
+      if (d.type === 'response_item' && d.payload && d.payload.type === 'message') {
+        const role = d.payload.role; const t = codexText(d.payload.content);
+        if (role !== 'user' && role !== 'assistant') return;
+        out.messageCount++; if (role === 'user') out.userCount++; else out.assistantCount++;
+        if (role === 'user' && t && t.length > 1 && t[0] !== '<') out.prompts.push({ ts: d.timestamp || null, text: t.slice(0, 600) });
+      }
+    });
+    rl.on('close', () => { out.goal = out.prompts[0] ? out.prompts[0].text : null; out.lastPrompt = out.prompts.length ? out.prompts[out.prompts.length - 1].text : null; resolve(out); });
+    rl.on('error', () => resolve(out));
+  });
+}
+
+// ---------- provider: Cursor — chats in SQLite (state.vscdb) ----------
+function fileUriToPath(uri) {
+  try { let p = decodeURIComponent(String(uri).replace(/^file:\/\//, '')); if (/^\/[a-zA-Z]:/.test(p)) p = p.slice(1); return p.replace(/\//g, path.sep); } catch { return null; }
+}
+function cursorSessions() {
+  const sq = sqliteMod(); if (!sq) return [];
+  const dbf = path.join(cursorUserDir(), 'globalStorage', 'state.vscdb');
+  let st; try { st = fs.statSync(dbf); } catch { return []; }
+  if (_cursorCache && _cursorCache.mtime === st.mtimeMs) return _cursorCache.list;
+  const out = [];
+  let db; try { db = new sq.DatabaseSync(dbf, { readOnly: true }); } catch { return []; }
+  try {
+    // json_extract keeps this fast — the blobs are large, we only need a few fields
+    const rows = db.prepare(
+      "SELECT substr(key,14) id, json_extract(value,'$.name') name, " +
+      "json_extract(value,'$.createdAt') createdAt, json_extract(value,'$.lastUpdatedAt') updatedAt " +
+      "FROM cursorDiskKV WHERE key LIKE 'composerData:%'").all();
+    for (const r of rows) {
+      const ts = r.updatedAt || r.createdAt || 0;
+      out.push({
+        sessionId: 'cursor:' + r.id, source: 'cursor',
+        title: (r.name && String(r.name).trim()) || '(Cursor chat)', cwd: null,
+        lastPrompt: null, sizeBytes: 0, mtime: ts,
+        firstTs: r.createdAt ? new Date(r.createdAt).toISOString() : null,
+        lastTs: ts ? new Date(ts).toISOString() : null,
+      });
+    }
+  } catch (e) { console.error('cursor:', e.message); } finally { try { db.close(); } catch {} }
+  _cursorCache = { mtime: st.mtimeMs, list: out };
+  return out;
+}
+function cursorDetail(id) {
+  const sq = sqliteMod(); if (!sq) return { error: 'node:sqlite nicht verfügbar' };
+  const comp = id.replace(/^cursor:/, '');
+  const dbf = path.join(cursorUserDir(), 'globalStorage', 'state.vscdb');
+  const out = { sessionId: id, source: 'cursor', messageCount: 0, userCount: 0, assistantCount: 0, prompts: [], images: [], firstTs: null, lastTs: null };
+  let db; try { db = new sq.DatabaseSync(dbf, { readOnly: true }); } catch { return out; }
+  const pushMsg = (role, txt) => { if (!txt) return; out.messageCount++; if (role === 'user') { out.userCount++; out.prompts.push({ ts: null, text: String(txt).slice(0, 600) }); } else out.assistantCount++; };
+  try {
+    const row = db.prepare('SELECT value FROM cursorDiskKV WHERE key=?').get('composerData:' + comp);
+    if (row && row.value) {
+      const data = JSON.parse(row.value.toString());
+      out.title = data.name || '(Cursor chat)';
+      const conv = data.conversation || [];
+      if (conv.length) {
+        for (const m of conv) pushMsg(m.type === 1 ? 'user' : 'assistant', m.text || m.richText || '');
+      } else if (Array.isArray(data.fullConversationHeadersOnly)) {
+        for (const h of data.fullConversationHeadersOnly) {
+          try { const b = db.prepare('SELECT value FROM cursorDiskKV WHERE key=?').get('bubbleId:' + comp + ':' + h.bubbleId); if (b && b.value) { const bd = JSON.parse(b.value.toString()); pushMsg(bd.type === 1 ? 'user' : 'assistant', bd.text || ''); } } catch {}
+        }
+      }
+    }
+  } catch (e) { out.error = String(e && e.message); } finally { try { db.close(); } catch {} }
+  out.goal = out.prompts[0] ? out.prompts[0].text : null;
+  out.lastPrompt = out.prompts.length ? out.prompts[out.prompts.length - 1].text : null;
+  return out;
 }
 
 // ---------- http ----------

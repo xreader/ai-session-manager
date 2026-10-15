@@ -86,6 +86,12 @@
   .row .sub{font-size:12px;color:var(--mut);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .pill{font-size:11px;border-radius:20px;padding:1px 8px;background:var(--soft);border:1px solid var(--bd)}
   .pill.col{background:var(--acc-bg);border-color:transparent;color:var(--acc)}
+  .srcpill{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0}
+  .srcpill.claude{background:rgba(79,70,229,.14);color:var(--acc)}
+  .srcpill.codex{background:rgba(16,163,74,.16);color:#15803d}
+  .srcpill.cursor{background:rgba(14,116,144,.16);color:#0e7490}
+  :root[data-theme=dark] .srcpill.codex{color:#4ade80}
+  :root[data-theme=dark] .srcpill.cursor{color:#38bdf8}
   .row .rtag{margin-top:6px}
   .row .rtag .pill.col{display:inline-block;font-size:10.5px;font-weight:650;padding:2px 9px;border-radius:6px;background:var(--soft);border:1px solid var(--bd2);color:var(--tx2)}
 
@@ -219,6 +225,7 @@
     <div id="left">
       <div class="searchbar"><input type="search" id="search" data-i18n-ph="search.placeholder" placeholder="Suchen…"><div class="shint" data-i18n="search.hint">Enter: in allen Transkripten suchen</div></div>
       <div class="chips" id="statusChips"></div>
+      <div class="chips" id="sourceChips" style="display:none"></div>
       <div id="list"></div>
     </div>
     <div id="detail"><div class="empty"><div class="ico">🗂️</div><div data-i18n="list.selectHint">← Session auswählen für Details</div></div></div>
@@ -252,7 +259,7 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(el=>el.title=t(el.dataset.i18nTitle));
 }
 let DATA={sessions:[],state:{}};
-let view="list", selectedId=null, dragId=null, filterProj="", filterText="", filterStatus="";
+let view="list", selectedId=null, dragId=null, filterProj="", filterText="", filterStatus="", filterSource="";
 let LISTORDER=[];
 let SEARCHRESULTS=null;
 function hl(text,q){
@@ -347,10 +354,26 @@ async function loadProjThumb(p,sessions){
 function matches(s){
   if(filterProj&&s.project!==filterProj)return false;
   if(filterStatus&&s.status!==filterStatus)return false;
+  if(filterSource&&s.source!==filterSource)return false;
   if(filterText){const t=(s.title+' '+(s.lastPrompt||'')+' '+(s.cwd||'')+' '+notesOf(s.sessionId)).toLowerCase();if(!t.includes(filterText.toLowerCase()))return false;}
   return true;
 }
 function setStatusFilter(k){filterStatus=k;renderList();}
+function setSourceFilter(k){filterSource=(filterSource===k?'':k);renderList();}
+function updateSourceChips(){
+  const el=document.getElementById('sourceChips'); if(!el)return;
+  const base=DATA.sessions.filter(s=>{
+    if(filterProj&&s.project!==filterProj)return false;
+    if(filterStatus&&s.status!==filterStatus)return false;
+    if(filterText){const t=(s.title+' '+(s.lastPrompt||'')+' '+(s.cwd||'')).toLowerCase();if(!t.includes(filterText.toLowerCase()))return false;}
+    return true;
+  });
+  const srcs=['claude','codex','cursor'].filter(s=>base.some(x=>x.source===s));
+  if(srcs.length<2){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='flex';
+  const chip=(k,label,n)=>`<span class="chip ${filterSource===k?'on':''}" onclick="setSourceFilter('${k}')">${label}<span class="c">${n}</span></span>`;
+  el.innerHTML=chip('',t('filter.all'),base.length)+srcs.map(s=>chip(s,s[0].toUpperCase()+s.slice(1),base.filter(x=>x.source===s).length)).join('');
+}
 function updateChips(){
   const el=document.getElementById('statusChips'); if(!el)return;
   const base=DATA.sessions.filter(s=>{
@@ -373,7 +396,7 @@ function updateStats(){
 
 /* ---------- LIST ---------- */
 function renderList(){
-  updateChips();
+  updateChips();updateSourceChips();
   const el0=document.getElementById('list');
   if(SEARCHRESULTS){
     const {q,results,loading}=SEARCHRESULTS;
@@ -388,7 +411,7 @@ function renderList(){
         <span class="dot ${s.status}" title="${stTxt(s.status)}"></span>
         <div class="body">
           <div class="ttl">${esc(s.title)}</div>
-          <div class="sub"><span>📁 ${esc(s.project||'?')}</span><span>· ${r.count} ${t('search.matches')}</span></div>
+          <div class="sub"><span class="srcpill ${s.source||'claude'}">${esc(s.source||'claude')}</span><span>📁 ${esc(s.project||'?')}</span><span>· ${r.count} ${t('search.matches')}</span></div>
           ${snips}
         </div>
       </div>`;
@@ -409,6 +432,7 @@ function renderList(){
       <div class="body">
         <div class="ttl">${esc(s.title)}</div>
         <div class="sub">
+          <span class="srcpill ${s.source||'claude'}">${esc(s.source||'claude')}</span>
           <span>📁 ${esc(s.project||'?')}</span>
           ${s.gitBranch?`<span>⎇ ${esc(s.gitBranch)}</span>`:''}
           <span>🕒 ${rel(s.lastActivity)}</span>
@@ -445,10 +469,10 @@ function renderDetail(id,det){
       <span class="dot ${s.status}" style="margin-top:8px"></span>
       <h2>${esc(det.customTitle||det.aiTitle||s.title)}</h2>
     </div>
-    <div class="sub" style="color:var(--mut);font-size:13px">${stTxt(s.status)} · ${esc(s.project||'?')}${s.gitBranch?' · ⎇ '+esc(s.gitBranch):''}</div>
+    <div class="sub" style="color:var(--mut);font-size:13px"><span class="srcpill ${s.source||'claude'}">${esc(s.source||'claude')}</span> ${stTxt(s.status)} · ${esc(s.project||'?')}${s.gitBranch?' · ⎇ '+esc(s.gitBranch):''}</div>
     <div class="dactions">
-      <button class="btn" onclick="resume('${id}','${cwdEsc}')">${t('btn.resume')}</button>
-      <button class="btn sec" onclick="openFolder('${cwdEsc}')">${t('btn.openFolder')}</button>
+      ${(s.source||'claude')==='claude'?`<button class="btn" onclick="resume('${id}','${cwdEsc}')">${t('btn.resume')}</button>`:''}
+      ${s.cwd?`<button class="btn ${(s.source||'claude')==='claude'?'sec':''}" onclick="openFolder('${cwdEsc}')">${t('btn.openFolder')}</button>`:''}
       <select class="btn sec colsel" onchange="saveState('${id}',{column:this.value}).then(()=>{renderList();renderBoard();renderTimeline();})">${colOpts}</select>
     </div>
 

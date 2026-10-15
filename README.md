@@ -40,6 +40,7 @@ Claude Session Manager solves exactly that.
 
 ## Features
 
+- 🧠 **Multi‑assistant** — not just Claude Code. It also surfaces **OpenAI Codex** (`~/.codex`) and **Cursor** chats, side by side, each tagged with a **source badge** and filterable by source.
 - 🟢 **Live status** — see which sessions are actually running (🟢), idle (🟡) or closed (⚫), via a real process check.
 - ☰ **List + detail** — sessions grouped by project; click for a rich detail panel:
   - 🎯 **Goal** (first prompt) and 📍 **latest state** (last prompt) — an instant summary, no AI call needed.
@@ -55,13 +56,18 @@ Claude Session Manager solves exactly that.
 
 ## How it works
 
-It reads, **read‑only**, from your local `~/.claude` directory:
+It reads, **read‑only**, from local assistant data:
 
 | Source | Used for |
 |---|---|
-| `~/.claude/sessions/<pid>.json` | running sessions (live status) |
-| `~/.claude/projects/*/*.jsonl` | transcripts → titles, goal, prompts, images, timing, full‑text search |
+| `~/.claude/sessions/<pid>.json` | Claude Code running sessions (live status) |
+| `~/.claude/projects/*/*.jsonl` | Claude Code transcripts → titles, goal, prompts, images, timing, full‑text search |
 | `~/.claude/session-backup/` (own git repo) | backed‑up transcripts → also read to show *archived* (cleaned‑up) sessions |
+| `~/.codex/sessions/**/rollout-*.jsonl` | **OpenAI Codex** sessions (title, goal, prompts, cwd) |
+| Cursor `state.vscdb` (SQLite) | **Cursor** chats (title, messages) — read via Node's built‑in `node:sqlite` |
+
+> **ChatGPT desktop** keeps its conversations in the cloud (only cache/cookies are stored locally),
+> so they can't be discovered on disk — Codex covers your local OpenAI coding work.
 
 Your own data (kanban columns, notes) and settings live in separate sidecar files
 (`~/.claude/session-manager-state.json`, `session-manager-config.json`).
@@ -131,15 +137,15 @@ Copy `lang/en.json`, translate the values, set `"_name"` (e.g. `"Français"`), s
 
 ## Roadmap
 
-- 🧠 **Support more AI assistants**, not just Claude Code — pluggable “session providers” for
-  other coding agents/CLIs (e.g. tools that keep local session/transcript data).
+- 🧠 **More assistants & deeper integration** — Codex & Cursor are in; next: include them in
+  timeline + full‑text search, and a clean pluggable “session provider” interface for more tools.
 - 🔔 **Notifications** for forgotten/idle running sessions.
 - 🗜️ **Compressed off‑site backup** (gzip transcripts) so large histories push cleanly to GitHub.
 - 📈 **Activity pulse** (GitHub‑style) instead of single dots in the timeline.
 - 🧩 **Plugin system** — contribute views, columns, commands and settings via drop‑in modules.
 
-Recently shipped: 🔍 full‑text search · 💾 per‑project git backup + session‑history backup ·
-🏷️ status filters · ⌨️ keyboard nav · 🌗 dark mode.
+Recently shipped: 🧠 Codex + Cursor support · 🔍 full‑text search ·
+💾 per‑project git backup + session‑history backup · 🏷️ status/source filters · ⌨️ keyboard nav · 🌗 dark mode.
 
 Ideas and feedback welcome — open an issue!
 
